@@ -1,9 +1,12 @@
 ---
 import { SITE_TITLE } from '../consts';
 import HeaderLink from './HeaderLink.astro';
+
+interface Props { overlay?: boolean }
+const { overlay = false } = Astro.props as Props;
 ---
 
-<header>
+<header class={`site-header ${overlay ? 'overlay' : ''}`}>
 	<nav>
 		<h2><a href="/">{SITE_TITLE}</a></h2>
 		<div class="internal-links">
@@ -13,7 +16,7 @@ import HeaderLink from './HeaderLink.astro';
 		</div>
 		<div class="social-links">
 			<a href="https://github.com/Simon-scm?tab=repositories" target="_blank">
-				<span class="sr-only">Go to Astro's GitHub repo</span>
+				<span class="sr-only">Check out my GitHub</span>
 				<svg viewBox="0 0 16 16" aria-hidden="true" width="32" height="32"
 					><path
 						fill="currentColor"
@@ -23,14 +26,22 @@ import HeaderLink from './HeaderLink.astro';
 			</a>
 		</div>
 	</nav>
-</header>
+ </header>
 <style>
-	header {
+  header.site-header {
 		margin: 0;
-		padding: 0 1em;
-		background: white;
-		box-shadow: 0 2px 8px rgba(var(--black), 5%);
+		padding: 0.5rem 0;
+		background: transparent;
+		box-shadow: none;
+    position: relative;
+    z-index: 1000;
 	}
+  header.overlay { position: absolute; top: 0vh; left: 0; right: 0; }
+  @media (max-width: 720px) { header.overlay { top: 0vh; } }
+
+  /* Hide-on-scroll behavior */
+  .site-header { transition: transform 0.3s ease; }
+  .site-header.is-hidden { transform: translateY(-120%); }
 	h2 {
 		margin: 0;
 		font-size: 1em;
@@ -40,17 +51,44 @@ import HeaderLink from './HeaderLink.astro';
 	h2 a.active {
 		text-decoration: none;
 	}
-	nav {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 960px;
+    max-width: calc(100% - 1em);
+    margin: 0.25rem auto;
+    padding: 0.2rem 0.65rem;
+    background: #0e1118;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  }
+
+	/* Tabs */
 	nav a {
-		padding: 1em 0.5em;
+		padding: 0.4em 0.6em;
 		color: var(--black);
-		border-bottom: 4px solid transparent;
 		text-decoration: none;
+		position: relative;
+		border-radius: 8px;
+		transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 	}
+  /* Active state: solid white pill with dark text */
+  nav a.active {
+    background: #ffffff;
+    color: #0b0d12;
+    border-radius: 12px;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.8);
+  }
+	/* Group hover: scale all, individual hover: scale a bit more */
+  nav:hover .internal-links a { transform: scale(1.06); }
+  .internal-links a:hover { transform: scale(1.12); }
+
+  @media (prefers-color-scheme: dark) {
+    nav { background: #0e1118; border-color: rgba(255, 255, 255, 0.12); }
+    nav a { color: rgba(255, 255, 255, 0.94); }
+  }
 	nav a.active {
 		text-decoration: none;
 		border-bottom-color: var(--accent);
@@ -65,3 +103,19 @@ import HeaderLink from './HeaderLink.astro';
 		}
 	}
 </style>
+
+<script>
+  let lastY = 0;
+  const headerEl = document.querySelector('header.site-header');
+  const onScroll = () => {
+    const y = window.scrollY || 0;
+    if (!headerEl) return;
+    if (y > lastY && y > 24) {
+      headerEl.classList.add('is-hidden');
+    } else {
+      headerEl.classList.remove('is-hidden');
+    }
+    lastY = y;
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+</script>

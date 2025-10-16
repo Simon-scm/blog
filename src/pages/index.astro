@@ -3,6 +3,13 @@ import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { getCollection, render } from 'astro:content';
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const latest = posts[0];
+const rendered = latest ? await render(latest) : null;
 ---
 
 <!doctype html>
@@ -11,39 +18,104 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
 	</head>
 	<body>
-		<Header />
+		<Header overlay={true} />
 		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This
-				template serves as a lightweight, minimally-styled starting point for anyone looking to build
-				a personal website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to
-				<a href="https://docs.astro.build/">read the docs</a>
-				or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out
-				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a>
-				by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
+			<section class="hero">
+				<h1>Trying.</h1>
+				<p>Thoughts, Ideas and Projects shared and archived here.</p>
+			</section>
+			{latest && rendered && (
+				<section class="latest">
+					<h2>Latest Post</h2>
+					<article>
+						<h3>{latest.data.title}</h3>
+						<div class="content">
+							{rendered.Content && <rendered.Content />}
+						</div>
+					</article>
+					<p><a href="/blog">See other posts</a></p>
+				</section>
+			)}
 		</main>
+		<style>
+			main {
+				width: 960px;
+				max-width: calc(100% - 1em);
+				margin: 0 auto;
+				padding: 1em 0.5em 2em 0.5em;
+			}
+			.hero {
+				min-height: 115svh;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+				padding: 0;
+				/* Full-bleed colored band */
+				position: relative;
+				left: 50%;
+				right: 50%;
+				margin-left: -50vw;
+				margin-right: -50vw;
+				width: 100vw;
+				background: #f5f7ff;
+				transform: translateY(-6vh);
+			}
+			.hero h1 { margin: 0 0 0.5rem 0; color: #111111; }
+			.hero p { margin: 0; color: #222222; }
+			.hero h1 {
+				margin: 0 0 0.5rem 0;
+				font-size: 2.5rem;
+				line-height: 1.1;
+			}
+			.hero p {
+				margin: 0;
+				color: rgb(var(--gray-dark));
+			}
+			/* Full-bleed band behind the latest post, matching the hero color */
+			.latest {
+				position: relative;
+				left: 50%;
+				right: 50%;
+				margin-left: -50vw;
+				margin-right: -50vw;
+				width: 100vw;
+				padding: 3rem 0;
+				background: #f5f7ff;
+			}
+			/* Card with a slightly lighter dark bg than the outside in dark mode */
+			.latest article {
+				width: 960px;
+				max-width: calc(100% - 1em);
+				margin: 0 auto;
+				background: #121621;
+				border: 1px solid rgba(255,255,255,0.08);
+				border-radius: 16px;
+				box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+				padding: 1rem;
+			}
+			@media (prefers-color-scheme: dark) {
+				.hero { background: #0f1116; }
+				.hero h1 { color: rgba(255,255,255,0.96); }
+				.hero p { color: rgba(255,255,255,0.82); }
+				.latest { background: #0f1116; }
+				.latest article { background: #121621; border-color: rgba(255,255,255,0.10); }
+			}
+			.latest h2 {
+				margin-bottom: 0.5rem;
+				text-align: center;
+			}
+			.latest article h3 { margin-top: 0.5rem; text-align: center; }
+			.latest .content {
+				margin-top: 1rem;
+			}
+			@media (max-width: 720px) {
+				.hero h1 {
+					font-size: 1.75rem;
+				}
+			}
+		</style>
 		<Footer />
 	</body>
 </html>
